@@ -1,13 +1,84 @@
 import { NextPage } from "next";
-import React from "react";
+import React, { useEffect } from "react";
 import Layout from "../../components/layout";
 import Input from "../../components/input";
 import Button from "../../components/button";
+import useUser from "@libs/client/useUser";
+import { useForm } from "react-hook-form";
+import useMutation from "@libs/client/useMutation";
+import { useRouter } from "next/router";
+
+interface EditProfileForm {
+  email?: string;
+  phone?: string;
+  name?: string;
+  formErrors?: string;
+}
+
+interface EditProfileResponse {
+  ok: boolean;
+  error?: string;
+}
 
 const EditProfile: NextPage = () => {
+  const { user } = useUser();
+  const {
+    register,
+    setValue,
+    handleSubmit,
+    setError,
+    formState: { errors },
+    clearErrors,
+  } = useForm<EditProfileForm>();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user?.email) setValue("email", user.email);
+    if (user?.phone) setValue("phone", user.phone);
+    if (user?.name) setValue("name", user.name);
+  }, [user, setValue]);
+
+  const [editProfile, { data, loading }] = useMutation<EditProfileResponse>(
+    `/api/users/me`
+  );
+  const onValid = ({ email, phone, name }: EditProfileForm) => {
+    if (loading) return;
+    if (email === "" && phone === "" && name == "") {
+      return setError("formErrors", {
+        message: "Email Or Phone number are required. You need to choose one.",
+      });
+    }
+    editProfile({
+      email,
+      phone,
+      name,
+    });
+  };
+  useEffect(() => {
+    if (data && !data.ok) {
+      setError("formErrors", { message: data?.error });
+    }
+  }, [data, setError]);
+
+  useEffect(() => {
+    if (data?.ok === true) {
+      router.push(`/users/profile`);
+    }
+  }, [data, router]);
+
+  const onChange = () => {
+    if (errors.formErrors?.message) {
+      clearErrors("formErrors");
+    }
+  };
+
   return (
     <Layout canGoBack title="Edit Profile">
-      <form className="py-10 px-4 space-y-4">
+      <form
+        onChange={onChange}
+        onSubmit={handleSubmit(onValid)}
+        className="py-10 px-4 space-y-4"
+      >
         <div className="flex items-center space-x-3">
           <div className="w-14 h-14 rounded-full bg-slate-500" />
           <label
@@ -23,15 +94,31 @@ const EditProfile: NextPage = () => {
             />
           </label>
         </div>
-        <Input required label="Email address" name="email" type="email" />
         <Input
-          required
+          register={register("name")}
+          label="Name"
+          name="Name"
+          type="text"
+        />
+        <Input
+          register={register("email")}
+          label="Email address"
+          name="email"
+          type="email"
+        />
+        <Input
+          register={register("phone")}
           label="Phone number"
           name="phone"
           type="number"
           kind="phone"
         />
-        <Button text="Update profile" />
+        {errors.formErrors ? (
+          <span className="my-2 text-red-500 font-medium text-center block">
+            {errors.formErrors.message}
+          </span>
+        ) : null}
+        <Button text={loading ? "Loading..." : "Update profile"} />
       </form>
     </Layout>
   );
