@@ -1,0 +1,7 @@
+{
+  "tailwindCSS.includeLanguages": { "typescriptreact": "html" },
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma",
+    "editor.formatOnSave": true
+  }
+}
