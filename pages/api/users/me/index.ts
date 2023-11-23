@@ -21,7 +21,7 @@ async function handler(
   if (req.method === "POST") {
     const {
       session: { user },
-      body: { email, phone, name },
+      body: { email, phone, name, avatarId },
     } = req;
     const currentUser = await client.user.findUnique({
       where: {
@@ -93,6 +93,16 @@ async function handler(
         },
         data: {
           name,
+        },
+      });
+    }
+    if (avatarId) {
+      await client.user.update({
+        where: {
+          id: user?.id,
+        },
+        data: {
+          avatar: avatarId,
         },
       });
     }
