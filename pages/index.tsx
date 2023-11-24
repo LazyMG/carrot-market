@@ -6,6 +6,7 @@ import useUser from "@libs/client/useUser";
 import Head from "next/head";
 import useSWR from "swr";
 import { Product } from "@prisma/client";
+"next/image";
 
 export interface ProductWithFavs extends Product {
   _count: {

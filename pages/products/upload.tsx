@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import useMutation from "@libs/client/useMutation";
 import { Product } from "@prisma/client";
 import { useRouter } from "next/router";
+import Image from "next/image";
 
 interface UploadProductForm {
   name: string;
@@ -67,10 +68,14 @@ const Upload: NextPage = () => {
       <form onSubmit={handleSubmit(onValid)} className="p-4 space-y-4">
         <div>
           {photoPreivew ? (
-            <img
-              src={photoPreivew}
-              className="w-full  text-gray-600 h-46 rounded-md"
-            />
+            <div className="relative h-96">
+              <Image
+                fill
+                src={photoPreivew}
+                alt=""
+                className="object-fill w-full  text-gray-600 h-46 rounded-md"
+              />
+            </div>
           ) : (
             <label className="w-full cursor-pointer text-gray-600 hover:border-orange-500 hover:text-orange-500 flex items-center justify-center border-2 border-dashed border-gray-300 h-48 rounded-md">
               <svg
